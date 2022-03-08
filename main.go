@@ -14,10 +14,32 @@ import (
 )
 
 func ProxyScrape(mode string) []string {
-	url := "https://api.openproxylist.xyz/" + mode + ".txt"
-	req, _ := http.Get(url)
-	body, _ := ioutil.ReadAll(req.Body)
-	proxylist := strings.Split(string(body), "\n")
+	var urls []string
+	var undupcheckproxylist []string
+	var proxylist []string
+	dupcheck := make(map[string]bool)
+	urls = append(urls, "https://api.openproxylist.xyz/"+mode+".txt")
+	urls = append(urls, "https://api.proxyscrape.com/v2/?request=getproxies&protocol="+mode)
+	if mode == "http" {
+		urls = append(urls, "https://www.proxyscan.io/download?type=http")
+		urls = append(urls, "https://www.proxyscan.io/download?type=https")
+	} else {
+		urls = append(urls, "https://www.proxyscan.io/download?type="+mode)
+	}
+
+	for _, url := range urls {
+		req, _ := http.Get(url)
+		body, _ := ioutil.ReadAll(req.Body)
+		// proxylist := strings.Split(string(body), "\n")
+		undupcheckproxylist = append(undupcheckproxylist, strings.Split(string(body), "\n")...)
+	}
+	//delete dup
+	for _, proxy := range undupcheckproxylist {
+		if !dupcheck[proxy] {
+			dupcheck[proxy] = true
+			proxylist = append(proxylist, proxy)
+		}
+	}
 	return proxylist
 }
 
@@ -40,7 +62,11 @@ func CheckProxy(proxy string, mode string) bool {
 }
 
 func main() {
-	fmt.Println("1.http\n2.socks4\n3.socks5\n")
+	// fmt.Println("1.http\n2.socks4\n3.socks5\n")
+	fmt.Println("1.http")
+	fmt.Println("2.socks4")
+	fmt.Println("3.socks5")
+	fmt.Println("")
 	fmt.Print("ScrapeMode: ")
 	var ScrapeMode string
 	var Threads int

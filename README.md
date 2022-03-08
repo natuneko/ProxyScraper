@@ -1,2 +1,2 @@
 # Proxy Scraper
-Tool to scrape proxy from openproxylist.xyz 
+Tool to scrape proxy
